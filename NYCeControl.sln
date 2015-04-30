@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NYCeControl", "NYCeControl\NYCeControl.vcxproj", "{B8115B58-FDBA-44FF-B6A0-FC76E0A4B468}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8115B58-FDBA-44FF-B6A0-FC76E0A4B468}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B8115B58-FDBA-44FF-B6A0-FC76E0A4B468}.Debug|Win32.Build.0 = Debug|Win32
+		{B8115B58-FDBA-44FF-B6A0-FC76E0A4B468}.Release|Win32.ActiveCfg = Release|Win32
+		{B8115B58-FDBA-44FF-B6A0-FC76E0A4B468}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
