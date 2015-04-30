@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "NYCe_Base.h"
 
-NYCe_Base::NYCe_Base(BOOL bSim)
+NYCe_Base::NYCe_Base(BOOL bSim = FALSE)
 {	
 	if (bSim)
 	{

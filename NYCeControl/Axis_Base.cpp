@@ -1,22 +1,22 @@
 #include "StdAfx.h"
 #include "Axis_Base.h"
 
-Axis_Base::Axis_Base(uint32_t num, const char* const names[], BOOL bSim) : m_axNum(num), NYCe_Base(bSim)
+Axis_Base::Axis_Base(uint32_t num, const char* const names[], BOOL bSim = FALSE) : m_axNum(num), NYCe_Base(bSim)
 {
-	m_pAxIds	= new SAC_AXIS[m_axNum];
-	m_pAxCons	= new BOOL[m_axNum];
-	m_pAxNames	= new char*[m_axNum];
+	m_pAxId		= new SAC_AXIS[m_axNum];
+	m_pAxCon	= new BOOL[m_axNum];
+	m_pAxName	= new char*[m_axNum];
 
-	ZeroMemory(m_pAxIds,	sizeof(SAC_AXIS) * m_axNum);
-	ZeroMemory(m_pAxCons,	sizeof(BOOL)	 * m_axNum);
-	ZeroMemory(m_pAxNames,	sizeof(char*)	 * m_axNum);
+	ZeroMemory(m_pAxId,		sizeof(SAC_AXIS) * m_axNum);
+	ZeroMemory(m_pAxCon,	sizeof(BOOL)	 * m_axNum);
+	ZeroMemory(m_pAxName,	sizeof(char*)	 * m_axNum);
 
 	for(uint32_t ax = 0; ax < m_axNum; ++ax) 
 	{
 		size_t len = strlen(names[ax]);
-		m_pAxNames[ax] = new char[len + 1];
+		m_pAxName[ax] = new char[len + 1];
 		uint32_t i(0);
-		while(m_pAxNames[ax][i] = names[ax][i]) ++i;
+		while(m_pAxName[ax][i] = names[ax][i]) ++i;
 	}
 
 	ConnectAxes();
@@ -26,11 +26,11 @@ Axis_Base::~Axis_Base(void)
 {
 	DisconnectAxes();
 
-	for (uint32_t ax = 0; ax < m_axNum; ++ax) delete[] m_pAxNames[ax];
+	for (uint32_t ax = 0; ax < m_axNum; ++ax) delete[] m_pAxName[ax];
 	
-	delete[] m_pAxNames;
-	delete[] m_pAxIds;
-	delete[] m_pAxCons;
+	delete[] m_pAxName;
+	delete[] m_pAxId;
+	delete[] m_pAxCon;
 
 	
 }
@@ -39,15 +39,15 @@ BOOL Axis_Base::ConnectAxes()
 {
 	for (uint32_t ax = 0; ax < m_axNum; ax++ )
 	{
-		if (m_pAxCons[ax]) continue;
+		if (m_pAxCon[ax]) continue;
 
-		nyceStatus = SacConnect( m_pAxNames[ ax ], &(m_pAxIds[ ax ]) );
+		nyceStatus = SacConnect( m_pAxName[ ax ], &(m_pAxId[ ax ]) );
 		if (NyceError(nyceStatus))
 		{
-			EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
+			EHer.HandleError(nyceStatus, m_pAxName[ ax ]);
 			return FALSE;
 		}
-		m_pAxCons[ax] = TRUE;
+		m_pAxCon[ax] = TRUE;
 	}
 	return TRUE;
 }
@@ -56,15 +56,15 @@ BOOL Axis_Base::DisconnectAxes()
 {
 	for (uint32_t ax = 0; ax < m_axNum; ax++ )
 	{
-		if (!m_pAxCons[ax]) continue;
+		if (!m_pAxCon[ax]) continue;
 
-		nyceStatus = SacDisconnect( m_pAxIds[ ax ] );
+		nyceStatus = SacDisconnect( m_pAxId[ ax ] );
 		if (NyceError(nyceStatus))
 		{
-			EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
+			EHer.HandleError(nyceStatus, m_pAxName[ ax ]);
 			return FALSE;
 		}
-		m_pAxCons[ax] = FALSE;
+		m_pAxCon[ax] = FALSE;
 	}
 	return TRUE;
 }
