@@ -16,6 +16,7 @@ NYCe_Base::NYCe_Base(BOOL bSim)
 		EHer.HandleError(nyceStatus, "NyceInit");
 	}
 };
+
 NYCe_Base::~NYCe_Base(void)
 {
 	nyceStatus = NyceTerm();

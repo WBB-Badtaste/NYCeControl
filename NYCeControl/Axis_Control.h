@@ -6,4 +6,3 @@ public:
 	Axis_Control(uint32_t num, const char* const names[], BOOL bSimMode);
 	~Axis_Control(void);
 };
-

@@ -3,12 +3,12 @@
 
 Axis_Base::Axis_Base(uint32_t num, const char* const names[], BOOL bSim) : m_axNum(num), NYCe_Base(bSim)
 {
-	m_pAxId		= new SAC_AXIS[m_axNum];
-	m_pAxCon	= new BOOL[m_axNum];
+	m_pAxIds	= new SAC_AXIS[m_axNum];
+	m_pAxCons	= new BOOL[m_axNum];
 	m_pAxNames	= new char*[m_axNum];
 
-	ZeroMemory(m_pAxId,		sizeof(SAC_AXIS) * m_axNum);
-	ZeroMemory(m_pAxCon,	sizeof(BOOL)	 * m_axNum);
+	ZeroMemory(m_pAxIds,	sizeof(SAC_AXIS) * m_axNum);
+	ZeroMemory(m_pAxCons,	sizeof(BOOL)	 * m_axNum);
 	ZeroMemory(m_pAxNames,	sizeof(char*)	 * m_axNum);
 
 	for(uint32_t ax = 0; ax < m_axNum; ++ax) 
@@ -24,28 +24,30 @@ Axis_Base::Axis_Base(uint32_t num, const char* const names[], BOOL bSim) : m_axN
 
 Axis_Base::~Axis_Base(void)
 {
+	DisconnectAxes();
+
 	for (uint32_t ax = 0; ax < m_axNum; ++ax) delete[] m_pAxNames[ax];
 	
 	delete[] m_pAxNames;
-	delete[] m_pAxId;
-	delete[] m_pAxCon;
+	delete[] m_pAxIds;
+	delete[] m_pAxCons;
 
-	DisconnectAxes();
+	
 }
 
 BOOL Axis_Base::ConnectAxes()
 {
 	for (uint32_t ax = 0; ax < m_axNum; ax++ )
 	{
-		if (m_pAxCon[ax]) continue;
+		if (m_pAxCons[ax]) continue;
 
-		nyceStatus = SacConnect( m_pAxNames[ ax ], &m_pAxId[ ax ] );
+		nyceStatus = SacConnect( m_pAxNames[ ax ], &(m_pAxIds[ ax ]) );
 		if (NyceError(nyceStatus))
 		{
 			EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
 			return FALSE;
 		}
-		m_pAxCon[ax] = TRUE;
+		m_pAxCons[ax] = TRUE;
 	}
 	return TRUE;
 }
@@ -54,15 +56,15 @@ BOOL Axis_Base::DisconnectAxes()
 {
 	for (uint32_t ax = 0; ax < m_axNum; ax++ )
 	{
-		if (!m_pAxCon[ax]) continue;
+		if (!m_pAxCons[ax]) continue;
 
-		nyceStatus = SacDisconnect( m_pAxId[ ax ] );
+		nyceStatus = SacDisconnect( m_pAxIds[ ax ] );
 		if (NyceError(nyceStatus))
 		{
 			EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
 			return FALSE;
 		}
-		m_pAxCon[ax] = FALSE;
+		m_pAxCons[ax] = FALSE;
 	}
 	return TRUE;
 }

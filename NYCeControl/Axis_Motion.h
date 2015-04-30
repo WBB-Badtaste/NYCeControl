@@ -10,7 +10,10 @@ protected:
 
 	Axis_Motion(uint32_t num, const char* const names[], BOOL bSim);
 	~Axis_Motion(void);
-	void TermAxis();
+	BOOL TermAxis();
 	BOOL InitAxis();
+
+public:
+	BOOL Reset();
 };
 

@@ -21,7 +21,7 @@ public:
 		CHAR path[100];
 		GetSystemTime(&time);
 		sprintf_s(path, "%s%s_%d-%d-%d.txt", ERROR_LOG_ADDR, ERROR_LOG_NAME, time.wYear, time.wMonth, time.wDay);
-		pLogFile = new ofstream(path);
+		pLogFile = new ofstream(path, ios::out | ios::app);
 	}
 
 	~ErrorHandler()
@@ -36,5 +36,6 @@ public:
 		GetSystemTime(&time);
 		*pLogFile<<"time: "<<time.wHour<<":"<<time.wMinute<<":"<<time.wSecond<<"    "<<"error occur at: "<<name<<"    "<<"error: "<<NyceGetStatusString(status)<<"\n"<<endl;
 	}
+
 };
 

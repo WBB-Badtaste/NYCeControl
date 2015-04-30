@@ -5,15 +5,19 @@
 
 Axis_Motion::Axis_Motion(uint32_t num, const char* const names[], BOOL bSim):Axis_Base(num, names, bSim), NYCe_Base(bSim)
 {
+
 	m_pAxHandle = new BOOL[m_axNum];
+	ZeroMemory(m_pAxHandle, sizeof(BOOL) * m_axNum);
+	InitAxis();
 }
 
 Axis_Motion::~Axis_Motion(void)
 {
+	TermAxis();
 	delete[] m_pAxHandle;
 }
 
-void Axis_Motion::TermAxis(void)
+BOOL Axis_Motion::TermAxis(void)
 {
 	uint32_t ax;
 	SAC_STATE sacState = SAC_NO_STATE;
@@ -21,31 +25,36 @@ void Axis_Motion::TermAxis(void)
 	nyceStatus = NYCE_OK;
 	for (ax = 0; ax < m_axNum; ax++ )
 	{
-
 		if (m_pAxHandle[ax])
 		{
-			nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacReadState(m_pAxId[ ax ], &sacState, &sacSpgState);
+			nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacReadState(m_pAxIds[ ax ], &sacState, &sacSpgState);
 			if(NyceSuccess(nyceStatus) && sacState == SAC_MOVING)
 			{
-				nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacQuickStop(m_pAxId[ ax ]);
+				nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacQuickStop(m_pAxIds[ ax ]);
 				if (NyceSuccess(nyceStatus))
 				{
-					nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_MOTION_STOPPED, 10 );
+					nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_MOTION_STOPPED, 10 );
 					if (NyceError(nyceStatus))
 					{
 						EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
-						nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacReset(m_pAxId[ ax ]);
-						nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_RESET, 10 );
+						nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacReset(m_pAxIds[ ax ]);
+						nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_RESET, 10 );
 					}
 				}
 			}
-			nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacShutdown(m_pAxId[ ax ]);
-			nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_SHUTDOWN, 10 );
+			nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacShutdown(m_pAxIds[ ax ]);
+			nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_SHUTDOWN, 10 );
 		}
 
-		nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacDisconnect(m_pAxId[ ax ]);
-		if(NyceError(nyceStatus)) EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
+		if(NyceError(nyceStatus)) 
+		{
+			EHer.HandleError(nyceStatus, m_pAxNames[ ax ]);
+			return FALSE;
+		}
+		else
+			m_pAxHandle[ax] = FALSE;
 	}
+	return TRUE;
 }
 
 BOOL Axis_Motion::InitAxis(void)
@@ -57,35 +66,34 @@ BOOL Axis_Motion::InitAxis(void)
 	nyceStatus = NYCE_OK;
 	for (ax = 0; ax < m_axNum; ax++ )
 	{
-
-		nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacReadState( m_pAxId[ ax ], &sacState, &sacSpgState);
+		nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacReadState( m_pAxIds[ ax ], &sacState, &sacSpgState);
 		if(NyceSuccess(nyceStatus))
 		{
 			switch (sacState)
 			{
 			case SAC_IDLE:
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacInitialize( m_pAxId[ ax ], SAC_USE_FLASH );
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_INITIALIZE, 10 );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacInitialize( m_pAxIds[ ax ], SAC_USE_FLASH );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_INITIALIZE, 10 );
 				m_pAxHandle[ax] = NyceSuccess(nyceStatus) ? TRUE :FALSE;
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacGetAxisConfiguration( m_pAxId[ ax ], &axisPars );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacGetAxisConfiguration( m_pAxIds[ ax ], &axisPars );
 				if ( NyceSuccess(nyceStatus) && axisPars.motorType == SAC_BRUSHLESS_AC_MOTOR )
 				{
-					nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacAlignMotor( m_pAxId[ ax ] );
-					nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_ALIGN_MOTOR, 10 );
+					nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacAlignMotor( m_pAxIds[ ax ] );
+					nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_ALIGN_MOTOR, 10 );
 				}
 			case SAC_FREE:
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacLock( m_pAxId[ ax ] );
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_LOCK, 10 );
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacHome( m_pAxId[ ax ] );
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_HOMING_COMPLETED, 10 );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacLock( m_pAxIds[ ax ] );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_LOCK, 10 );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacHome( m_pAxIds[ ax ] );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_HOMING_COMPLETED, 10 );
 				break;
 			case SAC_MOVING:
 				printf("Waiting the motion stop...");
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_MOTION_STOPPED, 30 );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_MOTION_STOPPED, 30 );
 				break;
 			default:
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacShutdown( m_pAxId[ ax ]);
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxId[ ax ], SAC_REQ_SHUTDOWN, 10 );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacShutdown( m_pAxIds[ ax ]);
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( m_pAxIds[ ax ], SAC_REQ_SHUTDOWN, 10 );
 				break;
 			}
 		}
@@ -101,3 +109,7 @@ BOOL Axis_Motion::InitAxis(void)
 	return TRUE;
 }
 
+BOOL Axis_Motion::Reset()
+{
+	return TermAxis() && InitAxis();
+}
