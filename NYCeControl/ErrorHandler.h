@@ -28,7 +28,7 @@ public:
 	{
 		pLogFile->close();
 		delete pLogFile;
-	}	
+	}
 
 	void HandleError(NYCE_STATUS status, const char *name)
 	{

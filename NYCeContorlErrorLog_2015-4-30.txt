@@ -12,3 +12,7 @@ time: 6:13:55    error occur at: DEF_AXIS_1    error: SAC_ERR_INVALID_AXIS_ID
 
 time: 6:14:22    error occur at: DEF_AXIS_1    error: SAC_ERR_INVALID_AXIS_ID
 
+time: 6:28:1    error occur at: DEF_AXIS_1    error: NCS_ERR_AXIS_DOES_NOT_EXIST
+
+time: 6:28:2    error occur at: DEF_AXIS_1    error: SAC_ERR_INVALID_AXIS_ID
+
